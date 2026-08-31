@@ -1,0 +1,112 @@
+@model MicrosoftPracticeManagement.Web.ViewModels.AppraisalsViewModel
+@{
+    ViewData["Title"] = "Appraisals & Performance Cycle";
+}
+
+<!-- Page Header -->
+<div class="page-header-bar">
+    <div>
+        <h1 class="page-title">Appraisals & Performance Leadership</h1>
+        <div class="page-desc">Performance ratings, promotion readiness tracking, and talent development cycle</div>
+    </div>
+    <span class="badge bg-primary fs-6 p-2">Cycle: @Model.Summary.CurrentCycle</span>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="kpi-card kpi-purple">
+            <div class="kpi-label"><span>Average Rating</span><i class="bi bi-star-fill text-warning"></i></div>
+            <div class="kpi-value">@Model.Summary.AverageRating <small style="font-size: 14px; font-weight: 500;">/ 5.0</small></div>
+            <div class="kpi-trend trend-up"><i class="bi bi-arrow-up-short"></i><span>Top Decile Delivery</span></div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="kpi-card kpi-green">
+            <div class="kpi-label"><span>Promotion Ready</span><i class="bi bi-arrow-up-circle-fill text-success"></i></div>
+            <div class="kpi-value">@Model.Summary.PromotionReadyCount</div>
+            <div class="kpi-trend trend-up"><i class="bi bi-award"></i><span>High Potential Talent</span></div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="kpi-card">
+            <div class="kpi-label"><span>Completed Reviews</span><i class="bi bi-check2-all text-primary"></i></div>
+            <div class="kpi-value">@Model.Summary.CompletedAppraisals</div>
+            <div class="kpi-trend trend-neutral"><span>100% On-time reviews</span></div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="kpi-card">
+            <div class="kpi-label"><span>Total Reviews</span><i class="bi bi-people text-secondary"></i></div>
+            <div class="kpi-value">@Model.Summary.TotalAppraisals</div>
+            <div class="kpi-trend trend-neutral"><span>Practice Cohort</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- Appraisals Table -->
+<div class="fluent-table-wrapper">
+    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="fw-semibold text-dark mb-0 fs-6">Consultant Performance Evaluations (@Model.Summary.Appraisals.Count)</h5>
+    </div>
+    <table class="fluent-table">
+        <thead>
+            <tr>
+                <th>Consultant</th>
+                <th>Designation</th>
+                <th>Manager</th>
+                <th>Performance Rating</th>
+                <th>Promotion Readiness</th>
+                <th>Target Role</th>
+                <th>Key Strengths & Feedback</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var a in Model.Summary.Appraisals)
+            {
+                <tr>
+                    <td>
+                        <a asp-controller="Resources" asp-action="Details" asp-route-id="@a.EmployeeId" class="fw-semibold text-primary text-decoration-none">
+                            @a.EmployeeName
+                        </a>
+                        <div class="text-muted" style="font-size: 11px;">@a.EmployeeId</div>
+                    </td>
+                    <td>@a.Designation</td>
+                    <td>@a.ManagerName</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-1">
+                            <span class="fw-bold text-dark">@a.PerformanceRating</span>
+                            <div class="text-warning" style="font-size: 11px;">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="bi @(i <= (int)a.PerformanceRating ? "bi-star-fill" : (i - a.PerformanceRating < 0.8m ? "bi-star-half" : "bi-star"))"></i>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        @if (a.PromotionReadiness.Contains("Ready Now") || a.PromotionReadiness.Contains("High Performer"))
+                        {
+                            <span class="badge bg-success-subtle text-success border border-success-subtle p-2">
+                                <i class="bi bi-award-fill me-1"></i>@a.PromotionReadiness
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-light text-dark border p-2">@a.PromotionReadiness</span>
+                        }
+                    </td>
+                    <td><small class="text-muted">@a.TargetDesignation</small></td>
+                    <td>
+                        <div class="text-dark fw-medium" style="font-size: 12px;">@a.KeyStrengths</div>
+                        <div class="text-muted" style="font-size: 11px;">@a.FeedbackSummary</div>
+                    </td>
+                    <td>
+                        <span class="ms-badge badge-healthy">@a.ReviewStatus</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

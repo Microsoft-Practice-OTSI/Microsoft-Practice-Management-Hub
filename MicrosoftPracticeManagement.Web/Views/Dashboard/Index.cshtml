@@ -1,0 +1,367 @@
+@model MicrosoftPracticeManagement.Web.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Executive Dashboard";
+}
+
+<!-- Page Header -->
+<div class="page-header-bar">
+    <div>
+        <h1 class="page-title">Executive Dashboard</h1>
+        <div class="page-desc">Real-time capacity, delivery metrics, utilization, and practice health overview</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="Reports" asp-action="ExportHealth" class="btn-fluent-secondary">
+            <i class="bi bi-file-earmark-arrow-down"></i>Export Summary
+        </a>
+        <a asp-controller="Projects" asp-action="Timeline" class="btn-fluent-primary">
+            <i class="bi bi-bar-chart-steps"></i>Allocation Timeline
+        </a>
+    </div>
+</div>
+
+<!-- 8 KPI Cards Grid -->
+<div class="kpi-grid">
+    <!-- 1. Total Resources -->
+    <div class="kpi-card">
+        <div class="kpi-label">
+            <span>Total Consultants</span>
+            <i class="bi bi-people text-primary fs-6"></i>
+        </div>
+        <div class="kpi-value">@Model.Summary.TotalResources</div>
+        <div class="kpi-trend trend-up">
+            <i class="bi bi-arrow-up-short"></i><span>+12 Net Growth (QoQ)</span>
+        </div>
+    </div>
+
+    <!-- 2. Billable Resources -->
+    <div class="kpi-card kpi-green">
+        <div class="kpi-label">
+            <span>Billable Headcount</span>
+            <i class="bi bi-person-check text-success fs-6"></i>
+        </div>
+        <div class="kpi-value">@Model.Summary.BillableResources</div>
+        <div class="kpi-trend trend-up">
+            <i class="bi bi-arrow-up-short"></i><span>@(Math.Round(((double)Model.Summary.BillableResources / Model.Summary.TotalResources) * 100, 1))% Billability Ratio</span>
+        </div>
+    </div>
+
+    <!-- 3. Non-Billable Resources -->
+    <div class="kpi-card">
+        <div class="kpi-label">
+            <span>Non-Billable / Internal</span>
+            <i class="bi bi-building text-secondary fs-6"></i>
+        </div>
+        <div class="kpi-value">@Model.Summary.NonBillableResources</div>
+        <div class="kpi-trend trend-neutral">
+            <i class="bi bi-dash"></i><span>Practice Leadership & Trainees</span>
+        </div>
+    </div>
+
+    <!-- 4. Bench Resources -->
+    <div class="kpi-card kpi-amber">
+        <div class="kpi-label">
+            <span>Bench / Available</span>
+            <i class="bi bi-hourglass-split text-warning fs-6"></i>
+        </div>
+        <div class="kpi-value">@Model.Summary.BenchResources</div>
+        <div class="kpi-trend trend-down">
+            <i class="bi bi-arrow-down-short"></i><span>@Model.Summary.BenchTrendDiff vs Last Month</span>
+        </div>
+    </div>
+
+    <!-- 5. Average Utilization -->
+    <div class="kpi-card kpi-green">
+        <div class="kpi-label">
+            <span>Average Utilization</span>
+            <i class="bi bi-speedometer2 text-success fs-6"></i>
+        </div>
+        <div class="kpi-value">@Model.Summary.AverageUtilizationPercent%</div>
+        <div class="kpi-trend trend-up">
+            <i class="bi bi-arrow-up-short"></i><span>+@Model.Summary.UtilizationTrendDiff% vs Last Month</span>
+        </div>
+    </div>
+
+    <!-- 6. Average Experience -->
+    <div class="kpi-card kpi-purple">
+        <div class="kpi-label">
+            <span>Avg Experience</span>
+            <i class="bi bi-award text-purple fs-6"></i>
+        </div>
+        <div class="kpi-value">@Model.Summary.AverageExperienceYears <small style="font-size: 14px; font-weight: 500;">Yrs</small></div>
+        <div class="kpi-trend trend-neutral">
+            <i class="bi bi-shield-check"></i><span>Senior-led Delivery Teams</span>
+        </div>
+    </div>
+
+    <!-- 7. Active Projects -->
+    <div class="kpi-card">
+        <div class="kpi-label">
+            <span>Active Projects</span>
+            <i class="bi bi-kanban text-primary fs-6"></i>
+        </div>
+        <div class="kpi-value">@Model.Summary.ActiveProjects</div>
+        <div class="kpi-trend trend-up">
+            <i class="bi bi-arrow-up-short"></i><span>+@Model.Summary.ProjectsTrendDiff New Engagements</span>
+        </div>
+    </div>
+
+    <!-- 8. Active Accounts -->
+    <div class="kpi-card">
+        <div class="kpi-label">
+            <span>Enterprise Accounts</span>
+            <i class="bi bi-briefcase text-dark fs-6"></i>
+        </div>
+        <div class="kpi-value">@Model.Summary.ActiveAccounts</div>
+        <div class="kpi-trend trend-neutral">
+            <i class="bi bi-check2-all text-success"></i><span>100% Client Retention</span>
+        </div>
+    </div>
+</div>
+
+<!-- Main Row: Practice Health Score & Attention Required Panel -->
+<div class="row g-4 mb-4">
+    <!-- Practice Health Score Card -->
+    <div class="col-lg-4">
+        <div class="fluent-card h-100 mb-0">
+            <div class="fluent-card-header">
+                <h2 class="fluent-card-title">
+                    <i class="bi bi-heart-pulse-fill text-danger"></i>Practice Health Score
+                </h2>
+                <span class="ms-badge @(Model.Summary.HealthStatus == "Healthy" ? "badge-healthy" : Model.Summary.HealthStatus == "Attention" ? "badge-attention" : "badge-critical")">
+                    @Model.Summary.HealthStatus
+                </span>
+            </div>
+
+            <div class="health-score-dial my-3">
+                <div class="health-circle @(Model.Summary.HealthStatus == "Attention" ? "attention" : Model.Summary.HealthStatus == "Critical" ? "critical" : "")">
+                    <div class="health-number">@Model.Summary.PracticeHealthScore</div>
+                    <div class="health-denom">/ 100</div>
+                </div>
+                <div class="text-center mt-3">
+                    <div class="fw-semibold fs-6">Enterprise Practice Vitality: @Model.Summary.HealthStatus</div>
+                    <small class="text-muted">Weighted algorithm measuring delivery velocity & readiness</small>
+                </div>
+            </div>
+
+            <div class="border-top pt-3 mt-auto">
+                <div class="d-flex justify-content-between mb-1" style="font-size: 12px;">
+                    <span class="text-muted">Utilization Velocity (35% weight)</span>
+                    <span class="fw-bold">@Model.Summary.UtilizationFactor / 35</span>
+                </div>
+                <div class="progress mb-2" style="height: 5px;">
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: @((Model.Summary.UtilizationFactor / 35.0) * 100)%"></div>
+                </div>
+
+                <div class="d-flex justify-content-between mb-1" style="font-size: 12px;">
+                    <span class="text-muted">Billability Health (25% weight)</span>
+                    <span class="fw-bold">@Model.Summary.BillabilityFactor / 25</span>
+                </div>
+                <div class="progress mb-2" style="height: 5px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: @((Model.Summary.BillabilityFactor / 25.0) * 100)%"></div>
+                </div>
+
+                <div class="d-flex justify-content-between mb-1" style="font-size: 12px;">
+                    <span class="text-muted">Bench Management (20% weight)</span>
+                    <span class="fw-bold">@Model.Summary.BenchRatioFactor / 20</span>
+                </div>
+                <div class="progress mb-2" style="height: 5px;">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: @((Model.Summary.BenchRatioFactor / 20.0) * 100)%"></div>
+                </div>
+
+                <div class="d-flex justify-content-between mb-1" style="font-size: 12px;">
+                    <span class="text-muted">Skill & Cert Readiness (20% weight)</span>
+                    <span class="fw-bold">@Model.Summary.SkillReadinessFactor / 20</span>
+                </div>
+                <div class="progress" style="height: 5px;">
+                    <div class="progress-bar bg-info" role="progressbar" style="width: @((Model.Summary.SkillReadinessFactor / 20.0) * 100)%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attention Required Panel -->
+    <div class="col-lg-8">
+        <div class="fluent-card h-100 mb-0">
+            <div class="fluent-card-header">
+                <h2 class="fluent-card-title">
+                    <i class="bi bi-exclamation-triangle-fill text-warning"></i>Attention Required Panel
+                </h2>
+                <span class="ms-badge badge-attention">Immediate Operational Actions</span>
+            </div>
+
+            <div class="row g-3">
+                <!-- 1. Bench Over 30 Days -->
+                <div class="col-md-6">
+                    <div class="attention-card alert-warning">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-semibold text-dark"><i class="bi bi-person-x me-2 text-warning"></i>Bench > 30 Days</span>
+                            <span class="badge bg-warning text-dark">@Model.Summary.BenchOver30Days.Count Resources</span>
+                        </div>
+                        <p class="text-muted mb-2" style="font-size: 12px;">Senior talent available for deployment into strategic pipeline.</p>
+                        @if (Model.Summary.BenchOver30Days.Any())
+                        {
+                            <ul class="list-unstyled mb-0" style="font-size: 12px;">
+                                @foreach (var b in Model.Summary.BenchOver30Days.Take(2))
+                                {
+                                    <li class="d-flex justify-content-between py-1 border-bottom border-light">
+                                        <a asp-controller="Resources" asp-action="Details" asp-route-id="@b.EmployeeId" class="text-decoration-none text-primary fw-medium">@b.Name</a>
+                                        <span class="text-muted">@b.PrimarySkill (@b.BenchDays d)</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        <div class="mt-2 text-end">
+                            <a asp-controller="Resources" asp-action="Index" asp-route-availability="Available" class="text-decoration-none fw-semibold" style="font-size: 11px;">View Bench Directory →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Staffing Gaps in Active Projects -->
+                <div class="col-md-6">
+                    <div class="attention-card alert-critical">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-semibold text-dark"><i class="bi bi-people-fill me-2 text-danger"></i>Project Staffing Gaps</span>
+                            <span class="badge bg-danger">@Model.Summary.ProjectsWithStaffingGaps.Count Projects</span>
+                        </div>
+                        <p class="text-muted mb-2" style="font-size: 12px;">Active engagements with open positions requiring fulfillment.</p>
+                        @if (Model.Summary.ProjectsWithStaffingGaps.Any())
+                        {
+                            <ul class="list-unstyled mb-0" style="font-size: 12px;">
+                                @foreach (var p in Model.Summary.ProjectsWithStaffingGaps.Take(2))
+                                {
+                                    <li class="d-flex justify-content-between py-1 border-bottom border-light">
+                                        <a asp-controller="Projects" asp-action="Details" asp-route-account="@p.Account" asp-route-id="@p.ProjectId" class="text-decoration-none text-danger fw-medium text-truncate" style="max-width: 180px;">@p.ProjectName</a>
+                                        <span class="badge bg-danger-subtle text-danger">Gap: @p.StaffingGap</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        <div class="mt-2 text-end">
+                            <a asp-controller="Projects" asp-action="Index" asp-route-health="Red" class="text-decoration-none fw-semibold text-danger" style="font-size: 11px;">Review Gaps →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Expiring Allocations in 30 Days -->
+                <div class="col-md-6">
+                    <div class="attention-card alert-info">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-semibold text-dark"><i class="bi bi-calendar2-range me-2 text-primary"></i>Expiring Allocations (30d)</span>
+                            <span class="badge bg-primary">@Model.Summary.ExpiringAllocationsIn30Days.Count Engagements</span>
+                        </div>
+                        <p class="text-muted mb-2" style="font-size: 12px;">Consultant project end dates approaching within next 30 days.</p>
+                        @if (Model.Summary.ExpiringAllocationsIn30Days.Any())
+                        {
+                            <ul class="list-unstyled mb-0" style="font-size: 12px;">
+                                @foreach (var a in Model.Summary.ExpiringAllocationsIn30Days.Take(2))
+                                {
+                                    <li class="d-flex justify-content-between py-1 border-bottom border-light">
+                                        <span>@a.EmployeeName</span>
+                                        <span class="text-muted">Ends @a.EndDate.ToString("MMM dd")</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        <div class="mt-2 text-end">
+                            <a asp-controller="Projects" asp-action="Timeline" class="text-decoration-none fw-semibold" style="font-size: 11px;">Open Timeline →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Certification Expiry (60 Days) -->
+                <div class="col-md-6">
+                    <div class="attention-card alert-warning">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-semibold text-dark"><i class="bi bi-patch-exclamation me-2 text-warning"></i>Certifications Expiring (60d)</span>
+                            <span class="badge bg-warning text-dark">@Model.Summary.ExpiringCertificationsIn60Days.Count Badges</span>
+                        </div>
+                        <p class="text-muted mb-2" style="font-size: 12px;">Microsoft partner specialization renewal window.</p>
+                        @if (Model.Summary.ExpiringCertificationsIn60Days.Any())
+                        {
+                            <ul class="list-unstyled mb-0" style="font-size: 12px;">
+                                @foreach (var c in Model.Summary.ExpiringCertificationsIn60Days.Take(2))
+                                {
+                                    <li class="d-flex justify-content-between py-1 border-bottom border-light">
+                                        <span class="text-truncate" style="max-width: 160px;">@c.EmployeeName</span>
+                                        <span class="badge bg-light text-dark border">@c.Certification.Split(':')[0]</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        <div class="mt-2 text-end">
+                            <a asp-controller="Skills" asp-action="Certifications" class="text-decoration-none fw-semibold" style="font-size: 11px;">Manage Renewals →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4 Chart.js Dashboards -->
+@* <div class="row g-4 mb-4">
+    <!-- 1. Resource Utilization Donut -->
+    <div class="col-lg-6">
+        <div class="fluent-card mb-0">
+            <div class="fluent-card-header">
+                <h3 class="fluent-card-title"><i class="bi bi-pie-chart-fill text-success"></i>Resource Allocation & Bench Breakdown</h3>
+                <span class="badge bg-light text-secondary border">250 Total</span>
+            </div>
+            <div style="height: 280px; position: relative;">
+                <canvas id="utilizationDonutChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Technology Distribution Bar -->
+    <div class="col-lg-6">
+        <div class="fluent-card mb-0">
+            <div class="fluent-card-header">
+                <h3 class="fluent-card-title"><i class="bi bi-bar-chart-fill text-primary"></i>Practice Technology Distribution</h3>
+                <span class="badge bg-light text-secondary border">Active Capability</span>
+            </div>
+            <div style="height: 280px; position: relative;">
+                <canvas id="techDistributionBarChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Capacity vs Demand Stacked Bar -->
+    <div class="col-lg-6">
+        <div class="fluent-card mb-0">
+            <div class="fluent-card-header">
+                <h3 class="fluent-card-title"><i class="bi bi-layers-fill text-info"></i>Practice Capacity vs Project Demand</h3>
+                <span class="badge bg-light text-secondary border">Headcount Stream</span>
+            </div>
+            <div style="height: 280px; position: relative;">
+                <canvas id="capacityDemandChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. 12-Month Utilization Trend -->
+    <div class="col-lg-6">
+        <div class="fluent-card mb-0">
+            <div class="fluent-card-header">
+                <h3 class="fluent-card-title"><i class="bi bi-graph-up-arrow text-primary"></i>12-Month Practice Utilization Trend</h3>
+                <span class="badge bg-success-subtle text-success border border-success-subtle">Target: 85%</span>
+            </div>
+            <div style="height: 280px; position: relative;">
+                <canvas id="utilizationTrendLineChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div> *@
+
+@section Scripts {
+    <script>
+        // Pass JSON chart payloads directly from ViewModel for instant rendering
+        window.dashboardChartData = {
+            utilizationDonut: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Summary.UtilizationDonutChart)),
+            techDistribution: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Summary.TechnologyDistributionBarChart)),
+            capacityVsDemand: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Summary.CapacityVsDemandChart)),
+            utilizationTrend: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Summary.UtilizationTrendLineChart))
+        };
+    </script>
+    <script src="~/js/dashboard.js" asp-append-version="true"></script>
+}

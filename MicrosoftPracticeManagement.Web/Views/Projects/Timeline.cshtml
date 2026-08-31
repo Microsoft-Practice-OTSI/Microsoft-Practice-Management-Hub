@@ -1,0 +1,161 @@
+@model MicrosoftPracticeManagement.Web.ViewModels.GanttTimelineViewModel
+@{
+    ViewData["Title"] = "Resource Allocation Timeline (Gantt)";
+}
+
+<!-- Page Header -->
+<div class="page-header-bar">
+    <div>
+        <h1 class="page-title">Resource Allocation Timeline</h1>
+        <div class="page-desc">Gantt-style delivery timelines, overallocated consultants, and bench capacity highlights</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn-fluent-secondary">
+            <i class="bi bi-grid-fill"></i>Project Cards
+        </a>
+        <a asp-controller="Resources" asp-action="Index" class="btn-fluent-primary">
+            <i class="bi bi-people-fill"></i>Resources Directory
+        </a>
+    </div>
+</div>
+
+<!-- Highlight Banners: Overallocated, Underallocated & Bench -->
+<div class="row g-3 mb-4">
+    <!-- 1. Overallocated Resources Warning -->
+    <div class="col-md-4">
+        <div class="fluent-card border-danger mb-0 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold text-danger"><i class="bi bi-exclamation-octagon-fill me-2"></i>Overallocated Resources</span>
+                <span class="badge bg-danger">@Model.Timeline.OverallocatedResources.Count Overallocated</span>
+            </div>
+            <p class="text-muted mb-2" style="font-size: 12px;">Consultants with combined project commitments exceeding 100% capacity.</p>
+            @if (Model.Timeline.OverallocatedResources.Any())
+            {
+                <ul class="list-unstyled mb-0" style="font-size: 12px;">
+                    @foreach (var o in Model.Timeline.OverallocatedResources.Take(3))
+                    {
+                        <li class="d-flex justify-content-between py-1 border-bottom border-light">
+                            <a asp-controller="Resources" asp-action="Details" asp-route-id="@o.EmployeeId" class="text-danger fw-semibold text-decoration-none">@o.Name</a>
+                            <span class="badge bg-danger-subtle text-danger">@o.AllocationPercent%</span>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <div class="text-success small"><i class="bi bi-check-circle me-1"></i>Zero overallocated resources</div>
+            }
+        </div>
+    </div>
+
+    <!-- 2. Underallocated / Gaps Projects -->
+    <div class="col-md-4">
+        <div class="fluent-card border-warning mb-0 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold text-warning"><i class="bi bi-exclamation-triangle-fill me-2"></i>Projects with Open Gaps</span>
+                <span class="badge bg-warning text-dark">@Model.Timeline.UnderallocatedProjects.Count Projects</span>
+            </div>
+            <p class="text-muted mb-2" style="font-size: 12px;">Active enterprise engagements requiring additional consultants.</p>
+            @if (Model.Timeline.UnderallocatedProjects.Any())
+            {
+                <ul class="list-unstyled mb-0" style="font-size: 12px;">
+                    @foreach (var u in Model.Timeline.UnderallocatedProjects.Take(3))
+                    {
+                        <li class="d-flex justify-content-between py-1 border-bottom border-light">
+                            <a asp-controller="Projects" asp-action="Details" asp-route-account="@u.Account" asp-route-id="@u.ProjectId" class="text-dark fw-medium text-truncate text-decoration-none" style="max-width: 170px;">@u.ProjectName</a>
+                            <span class="badge bg-warning-subtle text-warning">Gap: @u.StaffingGap</span>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+
+    <!-- 3. Bench Capacity Available -->
+    <div class="col-md-4">
+        <div class="fluent-card border-info mb-0 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold text-primary"><i class="bi bi-person-check-fill me-2"></i>Bench Ready for Deployment</span>
+                <span class="badge bg-primary">@Model.Timeline.BenchResources.Count Bench</span>
+            </div>
+            <p class="text-muted mb-2" style="font-size: 12px;">Immediate available consultants ready to fulfill open staffing requirements.</p>
+            @if (Model.Timeline.BenchResources.Any())
+            {
+                <ul class="list-unstyled mb-0" style="font-size: 12px;">
+                    @foreach (var b in Model.Timeline.BenchResources.Take(3))
+                    {
+                        <li class="d-flex justify-content-between py-1 border-bottom border-light">
+                            <a asp-controller="Resources" asp-action="Details" asp-route-id="@b.EmployeeId" class="text-primary fw-semibold text-decoration-none">@b.Name</a>
+                            <span class="text-muted">@b.PrimarySkill</span>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Gantt Timeline Visualization -->
+<div class="fluent-card">
+    <div class="fluent-card-header">
+        <h2 class="fluent-card-title"><i class="bi bi-calendar3-range text-primary"></i>Active Project Allocation Schedule</h2>
+        <div class="d-flex gap-2">
+            <span class="badge bg-success-subtle text-success border border-success-subtle">Green (Staffed)</span>
+            <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Amber (Attention)</span>
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Red (Gap)</span>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle mb-0" style="font-size: 12px;">
+            <thead class="table-light text-center">
+                <tr>
+                    <th style="min-width: 250px; text-align: left;">Project & Client Account</th>
+                    <th style="width: 90px;">Start</th>
+                    <th style="width: 90px;">End</th>
+                    <th style="width: 80px;">Team</th>
+                    <th style="min-width: 320px;">Delivery Timeline & Allocation Band</th>
+                    <th style="width: 80px;">Health</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model.Timeline.Projects)
+                {
+                    <tr>
+                        <td>
+                            <a asp-action="Details" asp-route-account="@p.Account" asp-route-id="@p.ProjectId" class="fw-semibold text-primary text-decoration-none">
+                                @p.ProjectName
+                            </a>
+                            <div class="text-muted" style="font-size: 11px;">@p.Account • PM: @p.PM</div>
+                        </td>
+                        <td class="text-center text-muted">@p.StartDate.ToString("MMM yyyy")</td>
+                        <td class="text-center text-muted">@p.EndDate.ToString("MMM yyyy")</td>
+                        <td class="text-center">
+                            <span class="fw-bold">@p.Allocated / @p.Required</span>
+                            @if (p.Gap > 0)
+                            {
+                                <div class="badge bg-danger-subtle text-danger" style="font-size: 10px;">-@p.Gap gap</div>
+                            }
+                        </td>
+                        <td>
+                            <div class="timeline-track">
+                                <div class="timeline-bar @(p.Health == "Green" ? "bg-success" : p.Health == "Amber" ? "bg-warning" : "bg-danger")"
+                                     style="width: @(Math.Min(100, Math.Max(25, (p.Allocated / (double)(p.Required > 0 ? p.Required : 1)) * 100)))%;"></div>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted mt-1" style="font-size: 10px;">
+                                <span>Kickoff: @p.StartDate.ToString("MMM yyyy")</span>
+                                <span>@p.ResourceAllocations.Count Active Team Members</span>
+                                <span>Go-Live: @p.EndDate.ToString("MMM yyyy")</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <span class="ms-badge @(p.Health == "Green" ? "badge-healthy" : p.Health == "Amber" ? "badge-attention" : "badge-critical")">
+                                @p.Health
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="MicrosoftPracticeManagement.Data/MicrosoftPracticeManagement.Data.csproj" />
+  <Project Path="MicrosoftPracticeManagement.Services/MicrosoftPracticeManagement.Services.csproj" />
+  <Project Path="MicrosoftPracticeManagement.Web/MicrosoftPracticeManagement.Web.csproj" />
+</Solution>

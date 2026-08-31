@@ -1,0 +1,63 @@
+@model IEnumerable<MicrosoftPracticeManagement.Services.DTOs.MissingSkillGapDto>
+@{
+    ViewData["Title"] = "Missing Skills Gap Report";
+}
+
+<div class="page-header-bar">
+    <div>
+        <h1 class="page-title">Missing Skills Gap Analysis</h1>
+        <div class="page-desc">Capacity vs Demand deficit analysis across strategic cloud & AI offerings</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="PracticeHealth" asp-action="Index" class="btn-fluent-secondary">
+            <i class="bi bi-people"></i>Hiring Requirements
+        </a>
+        <a asp-action="Index" class="btn-fluent-secondary">
+            <i class="bi bi-arrow-left"></i>Skills Matrix
+        </a>
+    </div>
+</div>
+
+<div class="fluent-table-wrapper">
+    <table class="fluent-table">
+        <thead>
+            <tr>
+                <th>Strategic Capability</th>
+                <th>Current Practice Capacity</th>
+                <th>Active Customer Demand</th>
+                <th>Net Deficit</th>
+                <th>Priority Level</th>
+                <th class="text-end">Recruitment Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var g in Model)
+            {
+                <tr>
+                    <td>
+                        <strong class="text-dark fs-6">@g.Technology</strong>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark border p-2">@g.CurrentCapacity Lead / Architects</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle p-2">@g.ProjectDemand Headcount</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-danger p-2 fs-6">@g.GapCount Open Positions</span>
+                    </td>
+                    <td>
+                        <span class="ms-badge @(g.Priority == "High" ? "badge-critical" : "badge-attention")">
+                            @g.Priority Priority
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <a asp-controller="PracticeHealth" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                            View Hiring Plan →
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

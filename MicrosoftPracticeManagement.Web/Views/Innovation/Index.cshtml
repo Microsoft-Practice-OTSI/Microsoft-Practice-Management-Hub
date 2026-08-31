@@ -1,0 +1,97 @@
+@model MicrosoftPracticeManagement.Web.ViewModels.InnovationViewModel
+@{
+    ViewData["Title"] = "Innovation & Reusable IP";
+}
+
+<!-- Page Header -->
+<div class="page-header-bar">
+    <div>
+        <h1 class="page-title">Case Studies & Practice Accelerators</h1>
+        <div class="page-desc">Pre-built IP, landing zone blueprints, AI starter kits, and customer case studies</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn @(string.IsNullOrEmpty(Model.SelectedCategory) ? "btn-fluent-primary" : "btn-fluent-secondary")">
+            All Assets
+        </a>
+        <a asp-action="Index" asp-route-category="CaseStudy" class="btn @(Model.SelectedCategory == "CaseStudy" ? "btn-fluent-primary" : "btn-fluent-secondary")">
+            Case Studies
+        </a>
+        <a asp-action="Index" asp-route-category="Accelerator" class="btn @(Model.SelectedCategory == "Accelerator" ? "btn-fluent-primary" : "btn-fluent-secondary")">
+            Accelerators & Blueprints
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    @foreach (var asset in Model.Assets)
+    {
+        <div class="col-md-6">
+            <div class="fluent-card h-100 mb-0 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge @(asset.Category == "Accelerator" ? "bg-primary" : "bg-success")">
+                            @asset.Category
+                        </span>
+                        <div class="text-warning small">
+                            @for (int i = 0; i < asset.RatingStars; i++)
+                            {
+                                <i class="bi bi-star-fill"></i>
+                            }
+                            <span class="text-muted ms-1">(@asset.DownloadsCount downloads)</span>
+                        </div>
+                    </div>
+
+                    <h4 class="fw-bold text-dark fs-5 mb-2">
+                        <a asp-action="Details" asp-route-category="@asset.Category" asp-route-id="@asset.Id" class="text-dark text-decoration-none hover-blue">
+                            @asset.Title
+                        </a>
+                    </h4>
+                    <div class="text-muted mb-3" style="font-size: 12px;">
+                        <span>Account: <strong>@asset.ClientAccount</strong></span> • 
+                        <span>Author: <strong>@asset.AuthorName</strong> (@asset.AuthorRole)</span>
+                    </div>
+
+                    <!-- Problem & Solution Box -->
+                    <div class="p-3 bg-light rounded border mb-3">
+                        <div class="mb-2">
+                            <strong class="text-danger d-block" style="font-size: 11px; text-transform: uppercase;">Business Problem:</strong>
+                            <p class="text-muted mb-0" style="font-size: 12px; line-height: 1.4;">@asset.BusinessProblem</p>
+                        </div>
+                        <div class="pt-2 border-top">
+                            <strong class="text-success d-block" style="font-size: 11px; text-transform: uppercase;">Delivered Solution:</strong>
+                            <p class="text-dark mb-0 fw-medium" style="font-size: 12px; line-height: 1.4;">@asset.Solution</p>
+                        </div>
+                    </div>
+
+                    <!-- Business Value -->
+                    <div class="p-2 bg-success-subtle rounded border border-success-subtle mb-3" style="font-size: 12px;">
+                        <i class="bi bi-graph-up-arrow text-success me-1"></i>
+                        <strong class="text-success">Impact:</strong> @asset.BusinessValue
+                    </div>
+
+                    <!-- Tech Tags -->
+                    <div class="d-flex flex-wrap gap-1 mb-3">
+                        @foreach (var tag in asset.TechnologyTags.Split(','))
+                        {
+                            <span class="badge bg-light text-dark border" style="font-size: 11px;">@tag.Trim()</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="border-top pt-3 mt-auto d-flex justify-content-between align-items-center">
+                    <a href="@asset.SharePointLink" target="_blank" class="text-decoration-none text-muted" style="font-size: 12px;">
+                        <i class="bi bi-microsoft me-1 text-primary"></i>SharePoint Repository
+                    </a>
+                    <div class="d-flex gap-2">
+                        <a asp-action="Download" asp-route-category="@asset.Category" asp-route-id="@asset.Id" class="btn btn-sm btn-outline-dark">
+                            <i class="bi bi-download me-1"></i>Download Whitepaper
+                        </a>
+                        <a asp-action="Details" asp-route-category="@asset.Category" asp-route-id="@asset.Id" class="btn btn-sm btn-fluent-primary">
+                            Details →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

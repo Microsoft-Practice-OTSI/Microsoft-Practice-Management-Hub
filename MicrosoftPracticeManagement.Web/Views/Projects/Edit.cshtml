@@ -1,0 +1,85 @@
+@model MicrosoftPracticeManagement.Services.DTOs.ProjectDto
+@{
+    ViewData["Title"] = $"Edit {Model.ProjectName}";
+}
+
+<div class="page-header-bar">
+    <div>
+        <h1 class="page-title">Edit Project Details</h1>
+        <div class="page-desc">Modify settings for @Model.ProjectName (@Model.ProjectId)</div>
+    </div>
+    <a asp-action="Details" asp-route-account="@Model.Account" asp-route-id="@Model.ProjectId" class="btn-fluent-secondary">
+        <i class="bi bi-arrow-left"></i>Back to Project
+    </a>
+</div>
+
+<div class="fluent-card" style="max-width: 800px;">
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ProjectId" />
+        <input type="hidden" asp-for="Account" />
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="ProjectName" class="form-label fw-semibold">Project Name *</label>
+                <input asp-for="ProjectName" class="form-control" required />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="PM" class="form-label fw-semibold">Project Manager *</label>
+                <input asp-for="PM" class="form-control" required />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="TechnologyStack" class="form-label fw-semibold">Technology Stack *</label>
+                <input asp-for="TechnologyStack" class="form-control" required />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Health" class="form-label fw-semibold">Delivery Health</label>
+                <select asp-for="Health" class="form-select">
+                    <option value="Green">Green (On Track)</option>
+                    <option value="Amber">Amber (Needs Attention)</option>
+                    <option value="Red">Red (Critical Gap)</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="RequiredResources" class="form-label fw-semibold">Required Headcount</label>
+                <input asp-for="RequiredResources" type="number" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="TotalAllocated" class="form-label fw-semibold">Currently Allocated</label>
+                <input asp-for="TotalAllocated" type="number" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Budget" class="form-label fw-semibold">Budget (USD)</label>
+                <input asp-for="Budget" type="number" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Status" class="form-label fw-semibold">Status</label>
+                <select asp-for="Status" class="form-select">
+                    <option value="Active">Active</option>
+                    <option value="Pipeline">Pipeline</option>
+                    <option value="Completed">Completed</option>
+                    <option value="On Hold">On Hold</option>
+                </select>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Description" class="form-label fw-semibold">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+            <a asp-action="Details" asp-route-account="@Model.Account" asp-route-id="@Model.ProjectId" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn-fluent-primary">
+                <i class="bi bi-check-lg"></i>Save Changes
+            </button>
+        </div>
+    </form>
+</div>

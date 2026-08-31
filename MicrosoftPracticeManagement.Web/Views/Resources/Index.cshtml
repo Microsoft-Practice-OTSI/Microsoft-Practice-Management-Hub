@@ -1,0 +1,261 @@
+@model MicrosoftPracticeManagement.Web.ViewModels.ResourceListViewModel
+@{
+    ViewData["Title"] = "Resources Directory";
+}
+
+<!-- Page Header -->
+<div class="page-header-bar">
+    <div>
+        <h1 class="page-title">Resources Directory</h1>
+        <div class="page-desc">Comprehensive consultant talent directory across Microsoft practice capabilities</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="Reports" asp-action="ExportResources" class="btn-fluent-secondary">
+            <i class="bi bi-file-earmark-arrow-down"></i>Export CSV
+        </a>
+        <a asp-action="Create" class="btn-fluent-primary">
+            <i class="bi bi-person-plus"></i>Add Consultant
+        </a>
+    </div>
+</div>
+
+<!-- Multi-Facet Filters Bar -->
+<form method="get" asp-action="Index" class="filter-bar">
+    <div class="d-flex align-items-center gap-2 flex-grow-1">
+        <i class="bi bi-search text-muted"></i>
+        <input type="text" name="search" value="@Model.Search" placeholder="Search name, ID, skill, location..." class="form-control form-control-sm" style="min-width: 200px;" />
+    </div>
+
+    <div>
+        <select name="technology" class="form-select form-select-sm filter-input">
+            <option value="">All Technologies</option>
+            @foreach (var tech in Model.AvailableTechnologies)
+            {
+                <option value="@tech" selected="@(Model.Technology == tech ? "selected" : null)">@tech</option>
+            }
+        </select>
+    </div>
+
+    <div>
+        <select name="location" class="form-select form-select-sm filter-input">
+            <option value="">All Locations</option>
+            @foreach (var loc in Model.AvailableLocations)
+            {
+                <option value="@loc" selected="@(Model.Location == loc ? "selected" : null)">@loc</option>
+            }
+        </select>
+    </div>
+
+    <div>
+        <select name="availability" class="form-select form-select-sm filter-input">
+            <option value="">All Availability</option>
+            <option value="Available" selected="@(Model.Availability == "Available" ? "selected" : null)">Bench / Available (0%)</option>
+            <option value="Partially Allocated" selected="@(Model.Availability == "Partially Allocated" ? "selected" : null)">Partially Allocated</option>
+            <option value="Allocated" selected="@(Model.Availability == "Allocated" ? "selected" : null)">Fully Allocated (100%)</option>
+        </select>
+    </div>
+
+    <div>
+        <select name="status" class="form-select form-select-sm filter-input">
+            <option value="">All Statuses</option>
+            <option value="Active" selected="@(Model.Status == "Active" ? "selected" : null)">Active</option>
+            <option value="Notice Period" selected="@(Model.Status == "Notice Period" ? "selected" : null)">Notice Period</option>
+        </select>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn-fluent-primary py-1 px-3">
+            <i class="bi bi-funnel"></i>Apply Filters
+        </button>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary py-1 px-3">
+            Reset
+        </a>
+    </div>
+</form>
+
+<!-- Table Results Card -->
+<div class="fluent-table-wrapper">
+    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+        <span class="fw-semibold text-dark" style="font-size: 13px;">
+            Showing @Model.Resources.Count() of @Model.TotalCount Consultants
+        </span>
+        <div class="d-flex align-items-center gap-2">
+            <span class="text-muted" style="font-size: 12px;">Sort by:</span>
+            <a asp-action="Index" 
+               asp-route-search="@Model.Search" asp-route-technology="@Model.Technology" 
+               asp-route-location="@Model.Location" asp-route-availability="@Model.Availability"
+               asp-route-sortBy="name" asp-route-sortDesc="@(Model.SortBy == "name" ? !Model.SortDesc : false)"
+               class="badge bg-white text-dark border text-decoration-none py-2 px-2">
+                Name @(Model.SortBy == "name" ? (Model.SortDesc ? "↓" : "↑") : "")
+            </a>
+            <a asp-action="Index" 
+               asp-route-search="@Model.Search" asp-route-technology="@Model.Technology" 
+               asp-route-location="@Model.Location" asp-route-availability="@Model.Availability"
+               asp-route-sortBy="experience" asp-route-sortDesc="@(Model.SortBy == "experience" ? !Model.SortDesc : true)"
+               class="badge bg-white text-dark border text-decoration-none py-2 px-2">
+                Experience @(Model.SortBy == "experience" ? (Model.SortDesc ? "↓" : "↑") : "")
+            </a>
+            <a asp-action="Index" 
+               asp-route-search="@Model.Search" asp-route-technology="@Model.Technology" 
+               asp-route-location="@Model.Location" asp-route-availability="@Model.Availability"
+               asp-route-sortBy="allocation" asp-route-sortDesc="@(Model.SortBy == "allocation" ? !Model.SortDesc : true)"
+               class="badge bg-white text-dark border text-decoration-none py-2 px-2">
+                Allocation @(Model.SortBy == "allocation" ? (Model.SortDesc ? "↓" : "↑") : "")
+            </a>
+        </div>
+    </div>
+
+    <table class="fluent-table">
+        <thead>
+            <tr>
+                <th>Consultant</th>
+                <th>Designation</th>
+                <th>Primary Skill</th>
+                <th>Experience</th>
+                <th>Location</th>
+                <th>Allocation %</th>
+                <th>Billable</th>
+                <th>Manager</th>
+                <th>Availability</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Resources.Any())
+            {
+                <tr>
+                    <td colspan="10" class="text-center py-5 text-muted">
+                        <i class="bi bi-search fs-3 d-block mb-2 text-secondary"></i>
+                        No consultants matched the selected filter criteria.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var r in Model.Resources)
+                {
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="@r.ProfileImageUrl" alt="@r.Name" class="rounded-circle" width="32" height="32" />
+                                <div>
+                                    <a asp-action="Details" asp-route-id="@r.EmployeeId" class="fw-semibold text-primary text-decoration-none">
+                                        @r.Name
+                                    </a>
+                                    <div class="text-muted" style="font-size: 11px;">@r.EmployeeId</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="text-dark fw-medium">@r.Designation</div>
+                            <small class="text-muted">@r.Department</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">@r.PrimarySkill</span>
+                            <div class="text-muted" style="font-size: 11px;">@r.SecondarySkill</div>
+                        </td>
+                        <td>
+                            <span class="fw-semibold">@r.ExperienceYears</span> <small class="text-muted">yrs</small>
+                        </td>
+                        <td>
+                            <i class="bi bi-geo-alt text-secondary me-1"></i>@r.Location
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height: 6px; width: 60px;">
+                                    <div class="progress-bar @(r.AllocationPercent == 0 ? "bg-warning" : r.AllocationPercent > 100 ? "bg-danger" : "bg-success")" 
+                                         role="progressbar" style="width: @(Math.Min(100, r.AllocationPercent))%"></div>
+                                </div>
+                                <span class="fw-bold @(r.AllocationPercent == 0 ? "text-warning" : r.AllocationPercent > 100 ? "text-danger" : "text-dark")" style="font-size: 12px;">
+                                    @r.AllocationPercent%
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            @if (r.Billable)
+                            {
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">Billable</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Internal</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="text-dark">@r.ManagerName</div>
+                            <small class="text-muted">@r.ManagerId</small>
+                        </td>
+                        <td>
+                            @if (r.AllocationPercent == 0 || r.Availability == "Available")
+                            {
+                                <span class="ms-badge badge-attention">Bench (@r.BenchDays d)</span>
+                            }
+                            else if (r.AllocationPercent < 100)
+                            {
+                                <span class="ms-badge badge-partially-allocated">Partial</span>
+                            }
+                            else
+                            {
+                                <span class="ms-badge badge-healthy">Allocated</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary btn-quick-view" data-emp-id="@r.EmployeeId" title="Quick View">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <a asp-action="Details" asp-route-id="@r.EmployeeId" class="btn btn-outline-primary" title="View Full Profile">
+                                    <i class="bi bi-person-lines-fill"></i>
+                                </a>
+                                <a asp-action="DownloadResume" asp-route-id="@r.EmployeeId" class="btn btn-outline-dark" title="Download Resume">
+                                    <i class="bi bi-file-earmark-arrow-down"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    <!-- Pagination Controls -->
+    @if (Model.TotalPages > 1)
+    {
+        <div class="p-3 bg-light border-top d-flex justify-content-between align-items-center">
+            <span class="text-muted" style="font-size: 12px;">
+                Page @Model.PageIndex of @Model.TotalPages (@Model.TotalCount total records)
+            </span>
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(Model.PageIndex <= 1 ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" 
+                           asp-route-page="@(Model.PageIndex - 1)" 
+                           asp-route-search="@Model.Search" 
+                           asp-route-technology="@Model.Technology" 
+                           asp-route-location="@Model.Location" 
+                           asp-route-availability="@Model.Availability">Previous</a>
+                    </li>
+                    @for (int p = Math.Max(1, Model.PageIndex - 2); p <= Math.Min(Model.TotalPages, Model.PageIndex + 2); p++)
+                    {
+                        <li class="page-item @(p == Model.PageIndex ? "active" : "")">
+                            <a class="page-link" asp-action="Index" 
+                               asp-route-page="@p" 
+                               asp-route-search="@Model.Search" 
+                               asp-route-technology="@Model.Technology" 
+                               asp-route-location="@Model.Location" 
+                               asp-route-availability="@Model.Availability">@p</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.PageIndex >= Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" 
+                           asp-route-page="@(Model.PageIndex + 1)" 
+                           asp-route-search="@Model.Search" 
+                           asp-route-technology="@Model.Technology" 
+                           asp-route-location="@Model.Location" 
+                           asp-route-availability="@Model.Availability">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>

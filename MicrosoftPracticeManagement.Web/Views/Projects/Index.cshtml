@@ -1,0 +1,185 @@
+@model MicrosoftPracticeManagement.Web.ViewModels.ProjectListViewModel
+@{
+    ViewData["Title"] = "Projects & Engagements";
+}
+
+<!-- Page Header -->
+<div class="page-header-bar">
+    <div>
+        <h1 class="page-title">Projects & Engagements</h1>
+        <div class="page-desc">Delivery tracking across enterprise customer portfolios and cloud initiatives</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Timeline" class="btn-fluent-secondary">
+            <i class="bi bi-bar-chart-steps"></i>Gantt Timeline
+        </a>
+        <a asp-controller="Reports" asp-action="ExportProjects" class="btn-fluent-secondary">
+            <i class="bi bi-file-earmark-arrow-down"></i>Export CSV
+        </a>
+        <a asp-action="Create" class="btn-fluent-primary">
+            <i class="bi bi-folder-plus"></i>New Project
+        </a>
+    </div>
+</div>
+
+<!-- Filters Bar -->
+<form method="get" asp-action="Index" class="filter-bar">
+    <div class="d-flex align-items-center gap-2 flex-grow-1">
+        <i class="bi bi-search text-muted"></i>
+        <input type="text" name="search" value="@Model.Search" placeholder="Search project name, account, PM, tech stack..." class="form-control form-control-sm" style="min-width: 220px;" />
+    </div>
+
+    <div>
+        <select name="account" class="form-select form-select-sm filter-input">
+            <option value="">All Accounts</option>
+            @foreach (var acc in Model.AvailableAccounts)
+            {
+                <option value="@acc" selected="@(Model.Account == acc ? "selected" : null)">@acc</option>
+            }
+        </select>
+    </div>
+
+    <div>
+        <select name="health" class="form-select form-select-sm filter-input">
+            <option value="">All Delivery Health</option>
+            <option value="Green" selected="@(Model.Health == "Green" ? "selected" : null)">Green (On Track)</option>
+            <option value="Amber" selected="@(Model.Health == "Amber" ? "selected" : null)">Amber (Attention)</option>
+            <option value="Red" selected="@(Model.Health == "Red" ? "selected" : null)">Red (Staffing Gap)</option>
+        </select>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn-fluent-primary py-1 px-3">
+            <i class="bi bi-funnel"></i>Filter
+        </button>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary py-1 px-3">Reset</a>
+    </div>
+</form>
+
+<!-- Tab Navigation: Grid vs Table View -->
+<ul class="nav nav-tabs mb-3" id="projectViewTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="cards-tab" data-bs-toggle="tab" data-bs-target="#cards-pane" type="button" role="tab">
+            <i class="bi bi-grid-fill me-1"></i>Project Cards (@Model.Projects.Count())
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="table-tab" data-bs-toggle="tab" data-bs-target="#table-pane" type="button" role="tab">
+            <i class="bi bi-table me-1"></i>Table View
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="projectViewContent">
+    <!-- 1. Grid Cards Pane -->
+    <div class="tab-pane fade show active" id="cards-pane" role="tabpanel">
+        <div class="row g-3">
+            @foreach (var p in Model.Projects)
+            {
+                <div class="col-md-6 col-xl-4">
+                    <div class="fluent-card h-100 mb-0 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-light text-dark border">@p.Account</span>
+                                <span class="ms-badge @(p.Health == "Green" ? "badge-healthy" : p.Health == "Amber" ? "badge-attention" : "badge-critical")">
+                                    <i class="bi bi-circle-fill" style="font-size: 8px;"></i> @p.Health
+                                </span>
+                            </div>
+
+                            <h5 class="fw-bold text-dark fs-6 mb-1">
+                                <a asp-action="Details" asp-route-account="@p.Account" asp-route-id="@p.ProjectId" class="text-dark text-decoration-none hover-blue">
+                                    @p.ProjectName
+                                </a>
+                            </h5>
+                            <div class="text-muted mb-2" style="font-size: 11px;">@p.ProjectId • PM: <strong>@p.PM</strong></div>
+
+                            <p class="text-muted mb-3" style="font-size: 12px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                @p.Description
+                            </p>
+
+                            <div class="p-2 bg-light rounded border mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 12px;">
+                                    <span>Team Allocation: <strong>@p.TotalAllocated / @p.RequiredResources</strong></span>
+                                    @if (p.StaffingGap > 0)
+                                    {
+                                        <span class="badge bg-danger">Gap: @p.StaffingGap</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success-subtle text-success">Fully Staffed</span>
+                                    }
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar @(p.StaffingGap > 0 ? "bg-warning" : "bg-success")" 
+                                         role="progressbar" 
+                                         style="width: @((p.TotalAllocated / (double)(p.RequiredResources > 0 ? p.RequiredResources : 1)) * 100)%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-top pt-2 mt-auto d-flex justify-content-between align-items-center" style="font-size: 12px;">
+                            <span class="text-muted"><i class="bi bi-calendar3 me-1"></i>@p.StartDate.ToString("MMM yyyy") - @p.EndDate.ToString("MMM yyyy")</span>
+                            <a asp-action="Details" asp-route-account="@p.Account" asp-route-id="@p.ProjectId" class="btn btn-sm btn-outline-primary py-0 px-2">
+                                Details →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- 2. Table Pane -->
+    <div class="tab-pane fade" id="table-pane" role="tabpanel">
+        <div class="fluent-table-wrapper">
+            <table class="fluent-table">
+                <thead>
+                    <tr>
+                        <th>Project Name</th>
+                        <th>Account</th>
+                        <th>Project Manager</th>
+                        <th>Timeline</th>
+                        <th>Staffing</th>
+                        <th>Health</th>
+                        <th>Tech Stack</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Projects)
+                    {
+                        <tr>
+                            <td>
+                                <a asp-action="Details" asp-route-account="@p.Account" asp-route-id="@p.ProjectId" class="fw-semibold text-primary text-decoration-none">
+                                    @p.ProjectName
+                                </a>
+                                <div class="text-muted" style="font-size: 11px;">@p.ProjectId</div>
+                            </td>
+                            <td><span class="badge bg-light text-dark border">@p.Account</span></td>
+                            <td>@p.PM</td>
+                            <td>@p.StartDate.ToString("MMM yyyy") - @p.EndDate.ToString("MMM yyyy")</td>
+                            <td>
+                                <div>@p.TotalAllocated / @p.RequiredResources allocated</div>
+                                @if (p.StaffingGap > 0)
+                                {
+                                    <span class="badge bg-danger-subtle text-danger">Gap: @p.StaffingGap</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="ms-badge @(p.Health == "Green" ? "badge-healthy" : p.Health == "Amber" ? "badge-attention" : "badge-critical")">
+                                    @p.Health
+                                </span>
+                            </td>
+                            <td><small class="text-muted">@p.TechnologyStack</small></td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-account="@p.Account" asp-route-id="@p.ProjectId" class="btn btn-sm btn-outline-primary">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

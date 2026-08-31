@@ -1,0 +1,98 @@
+@model MicrosoftPracticeManagement.Web.ViewModels.ReportsViewModel
+@{
+    ViewData["Title"] = "Reports & Export Center";
+}
+
+<!-- Page Header -->
+<div class="page-header-bar">
+    <div>
+        <h1 class="page-title">Reports & Data Export Center</h1>
+        <div class="page-desc">Generate production-ready exports, consultant rosters, utilization spreadsheets, and executive PDFs</div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- 1. Resource Directory Export -->
+    <div class="col-md-6">
+        <div class="fluent-card h-100 mb-0 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-people-fill fs-4 text-primary"></i>
+                    <h4 class="fw-bold text-dark fs-5 mb-0">Consultant Talent Directory Export</h4>
+                </div>
+                <p class="text-muted mb-3" style="font-size: 13px; line-height: 1.5;">
+                    Download complete roster of 250+ consultants including employee IDs, primary & secondary technical skills, billability flags, utilization percentages, base locations, and people managers.
+                </p>
+                <div class="badge bg-light text-secondary border mb-3">Format: CSV / Excel Compatible • Uploads to Azure Blob Storage</div>
+            </div>
+            <div class="border-top pt-3 mt-auto">
+                <a asp-action="ExportResources" class="btn-fluent-primary w-100 justify-content-center">
+                    <i class="bi bi-file-earmark-arrow-down"></i>Export Consultant Roster (.csv)
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Projects & Staffing Gaps Export -->
+    <div class="col-md-6">
+        <div class="fluent-card h-100 mb-0 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-kanban-fill fs-4 text-success"></i>
+                    <h4 class="fw-bold text-dark fs-5 mb-0">Projects & Staffing Gaps Report</h4>
+                </div>
+                <p class="text-muted mb-3" style="font-size: 13px; line-height: 1.5;">
+                    Detailed export of 35 active enterprise engagements, start and end delivery dates, project manager assignments, required headcount vs total allocated, and open staffing gaps.
+                </p>
+                <div class="badge bg-light text-secondary border mb-3">Format: CSV / Excel Compatible • Uploads to Azure Blob Storage</div>
+            </div>
+            <div class="border-top pt-3 mt-auto">
+                <a asp-action="ExportProjects" class="btn-fluent-primary w-100 justify-content-center" style="background-color: var(--ms-green); border-color: var(--ms-green);">
+                    <i class="bi bi-file-earmark-arrow-down"></i>Export Projects Report (.csv)
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Utilization & Bench Analytics Export -->
+    <div class="col-md-6">
+        <div class="fluent-card h-100 mb-0 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-speedometer2 fs-4 text-warning"></i>
+                    <h4 class="fw-bold text-dark fs-5 mb-0">Utilization & Bench Ageing Report</h4>
+                </div>
+                <p class="text-muted mb-3" style="font-size: 13px; line-height: 1.5;">
+                    Full breakdown of billable utilization percentages, available bench consultants, bench ageing in days (> 30 days flags), and competency profiles ready for deployment.
+                </p>
+                <div class="badge bg-light text-secondary border mb-3">Format: CSV / Excel Compatible • Uploads to Azure Blob Storage</div>
+            </div>
+            <div class="border-top pt-3 mt-auto">
+                <a asp-action="ExportUtilization" class="btn-fluent-primary w-100 justify-content-center" style="background-color: var(--ms-yellow); border-color: var(--ms-yellow); color: #000;">
+                    <i class="bi bi-file-earmark-arrow-down"></i>Export Utilization Report (.csv)
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Practice Health Executive Summary -->
+    <div class="col-md-6">
+        <div class="fluent-card h-100 mb-0 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-heart-pulse-fill fs-4 text-danger"></i>
+                    <h4 class="fw-bold text-dark fs-5 mb-0">Practice Health Executive Summary</h4>
+                </div>
+                <p class="text-muted mb-3" style="font-size: 13px; line-height: 1.5;">
+                    High-level executive briefing summarizing overall practice health score (87/100), billability metrics, attrition trajectory, experience demographics, and quarterly hiring targets.
+                </p>
+                <div class="badge bg-light text-secondary border mb-3">Format: CSV / Excel Compatible • Uploads to Azure Blob Storage</div>
+            </div>
+            <div class="border-top pt-3 mt-auto">
+                <a asp-action="ExportHealth" class="btn-fluent-primary w-100 justify-content-center" style="background-color: var(--ms-purple); border-color: var(--ms-purple);">
+                    <i class="bi bi-file-earmark-arrow-down"></i>Export Executive Briefing (.csv)
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

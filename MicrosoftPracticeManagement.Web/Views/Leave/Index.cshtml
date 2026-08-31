@@ -1,0 +1,133 @@
+@model MicrosoftPracticeManagement.Web.ViewModels.LeaveViewModel
+@{
+    ViewData["Title"] = "Leave Tracker & Team Calendar";
+}
+
+<!-- Page Header -->
+<div class="page-header-bar">
+    <div>
+        <h1 class="page-title">Leave Tracker & Availability</h1>
+        <div class="page-desc">Consultant planned absences, team calendars, and project continuity management</div>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn-fluent-primary" data-bs-toggle="modal" data-bs-target="#requestLeaveModal">
+            <i class="bi bi-calendar-plus"></i>Request Leave
+        </button>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="kpi-card kpi-purple">
+            <div class="kpi-label"><span>On Leave Today</span><i class="bi bi-person-slash text-purple"></i></div>
+            <div class="kpi-value">@Model.Summary.TotalOnLeaveToday</div>
+            <div class="kpi-trend trend-neutral"><span>@DateTime.UtcNow.ToString("dddd, MMMM dd, yyyy")</span></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="kpi-card">
+            <div class="kpi-label"><span>Total Approved Absences This Month</span><i class="bi bi-calendar-check text-primary"></i></div>
+            <div class="kpi-value">@Model.Summary.TotalOnLeaveThisMonth</div>
+            <div class="kpi-trend trend-neutral"><span>Period: @Model.SelectedMonth</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming Leaves List -->
+<div class="fluent-table-wrapper">
+    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="fw-semibold text-dark mb-0 fs-6">Upcoming Scheduled Leaves (@Model.Summary.UpcomingLeaves.Count)</h5>
+    </div>
+    <table class="fluent-table">
+        <thead>
+            <tr>
+                <th>Consultant</th>
+                <th>Manager</th>
+                <th>Leave Type</th>
+                <th>Duration</th>
+                <th>Days</th>
+                <th>Reason / Continuity Plan</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var l in Model.Summary.UpcomingLeaves)
+            {
+                <tr>
+                    <td>
+                        <a asp-controller="Resources" asp-action="Details" asp-route-id="@l.EmployeeId" class="fw-semibold text-primary text-decoration-none">
+                            @l.EmployeeName
+                        </a>
+                        <div class="text-muted" style="font-size: 11px;">@l.EmployeeId</div>
+                    </td>
+                    <td>@l.ManagerName</td>
+                    <td><span class="badge bg-light text-dark border">@l.LeaveType</span></td>
+                    <td>@l.StartDate.ToString("MMM dd") - @l.EndDate.ToString("MMM dd, yyyy")</td>
+                    <td><span class="fw-bold">@l.DaysCount days</span></td>
+                    <td><small class="text-muted">@l.Reason</small></td>
+                    <td>
+                        <span class="ms-badge @(l.Status == "Approved" ? "badge-healthy" : "badge-attention")">
+                            @l.Status
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Request Leave Modal -->
+<div class="modal fade" id="requestLeaveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom px-4 py-3 bg-light">
+                <h5 class="modal-title fs-6 fw-semibold"><i class="bi bi-calendar-plus text-primary me-2"></i>Submit Leave Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="RequestLeave" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Consultant Name *</label>
+                        <input type="text" name="EmployeeName" class="form-control" placeholder="e.g. Suman Bhavansi" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Employee ID *</label>
+                        <input type="text" name="EmployeeId" class="form-control" placeholder="e.g. EMP-1010" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Leave Type</label>
+                        <select name="LeaveType" class="form-select">
+                            <option value="Annual Leave">Annual Leave</option>
+                            <option value="Sick Leave">Sick Leave</option>
+                            <option value="Personal Leave">Personal Leave</option>
+                        </select>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Start Date</label>
+                            <input type="date" name="StartDate" class="form-control" value="@DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-dd")" required />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">End Date</label>
+                            <input type="date" name="EndDate" class="form-control" value="@DateTime.UtcNow.AddDays(9).ToString("yyyy-MM-dd")" required />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Days Count</label>
+                        <input type="number" name="DaysCount" class="form-control" value="2" min="1" max="30" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Reason / Project Handover</label>
+                        <textarea name="Reason" class="form-control" rows="2" placeholder="Delegated project tasks to peer architect..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top px-4 py-3 bg-light">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-fluent-primary">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

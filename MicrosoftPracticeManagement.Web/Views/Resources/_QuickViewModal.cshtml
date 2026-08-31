@@ -1,0 +1,80 @@
+@model MicrosoftPracticeManagement.Services.DTOs.ResourceDto
+
+<div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+    <img src="@Model.ProfileImageUrl" alt="@Model.Name" class="rounded-circle shadow-sm" width="60" height="60" />
+    <div>
+        <div class="d-flex align-items-center gap-2">
+            <h4 class="mb-0 fw-bold fs-5 text-dark">@Model.Name</h4>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">@Model.EmployeeId</span>
+            @if (Model.AllocationPercent == 0 || Model.Availability == "Available")
+            {
+                <span class="ms-badge badge-attention">Bench (@Model.BenchDays d)</span>
+            }
+            else
+            {
+                <span class="ms-badge badge-healthy">@Model.AllocationPercent% Allocated</span>
+            }
+        </div>
+        <div class="text-muted mt-1" style="font-size: 13px;">
+            <span class="fw-medium text-dark">@Model.Designation</span> • 
+            <i class="bi bi-geo-alt me-1"></i>@Model.Location Delivery Hub
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6">
+        <div class="p-2 bg-light rounded border">
+            <small class="text-muted d-block">Primary Competency</small>
+            <strong class="text-dark">@Model.PrimarySkill</strong>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="p-2 bg-light rounded border">
+            <small class="text-muted d-block">Experience</small>
+            <strong class="text-dark">@Model.ExperienceYears Years</strong>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="p-2 bg-light rounded border">
+            <small class="text-muted d-block">People Manager</small>
+            <strong class="text-dark">@Model.ManagerName</strong>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="p-2 bg-light rounded border">
+            <small class="text-muted d-block">Billability Status</small>
+            <strong class="@(Model.Billable ? "text-success" : "text-secondary")">
+                @(Model.Billable ? "Billable (Customer)" : "Non-Billable")
+            </strong>
+        </div>
+    </div>
+</div>
+
+@if (Model.CurrentAllocations.Any())
+{
+    <div class="mb-4">
+        <h6 class="fw-semibold text-dark mb-2" style="font-size: 13px;">Current Project Allocations:</h6>
+        <div class="list-group list-group-flush border rounded">
+            @foreach (var a in Model.CurrentAllocations)
+            {
+                <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+                    <div>
+                        <div class="fw-semibold text-primary" style="font-size: 13px;">@a.ProjectName</div>
+                        <small class="text-muted">@a.Account • Role: @a.Role</small>
+                    </div>
+                    <span class="badge bg-success-subtle text-success border">@a.AllocationPercent%</span>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center pt-3 border-top">
+    <a asp-action="DownloadResume" asp-route-id="@Model.EmployeeId" class="btn btn-sm btn-outline-dark">
+        <i class="bi bi-file-earmark-arrow-down me-1"></i>Download Resume
+    </a>
+    <a asp-action="Details" asp-route-id="@Model.EmployeeId" class="btn btn-sm btn-primary">
+        View Full Profile →
+    </a>
+</div>

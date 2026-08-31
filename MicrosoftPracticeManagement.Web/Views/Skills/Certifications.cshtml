@@ -1,0 +1,68 @@
+@model IEnumerable<MicrosoftPracticeManagement.Services.DTOs.SkillDto>
+@{
+    ViewData["Title"] = "Microsoft Certifications Tracker";
+}
+
+<div class="page-header-bar">
+    <div>
+        <h1 class="page-title">Microsoft Certifications Tracker</h1>
+        <div class="page-desc">Monitoring partner competency compliance and credential renewals within 60 days</div>
+    </div>
+    <a asp-action="Index" class="btn-fluent-secondary">
+        <i class="bi bi-arrow-left"></i>Skills Matrix
+    </a>
+</div>
+
+<div class="fluent-table-wrapper">
+    <table class="fluent-table">
+        <thead>
+            <tr>
+                <th>Consultant</th>
+                <th>Certification Title</th>
+                <th>Category</th>
+                <th>Issue Date</th>
+                <th>Expiry Date</th>
+                <th>Status</th>
+                <th class="text-end">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var c in Model)
+            {
+                <tr>
+                    <td>
+                        <a asp-controller="Resources" asp-action="Details" asp-route-id="@c.EmployeeId" class="fw-semibold text-primary text-decoration-none">
+                            @c.EmployeeName
+                        </a>
+                        <div class="text-muted" style="font-size: 11px;">@c.EmployeeId</div>
+                    </td>
+                    <td>
+                        <div class="fw-semibold text-dark"><i class="bi bi-patch-check-fill text-primary me-1"></i>@c.Certification</div>
+                    </td>
+                    <td><span class="badge bg-light text-dark border">@c.Category</span></td>
+                    <td>@(c.IssueDate?.ToString("MMM dd, yyyy") ?? "N/A")</td>
+                    <td>
+                        <span class="fw-bold @(c.IsExpiringSoon ? "text-warning" : "text-dark")">
+                            @(c.ExpiryDate?.ToString("MMM dd, yyyy") ?? "N/A")
+                        </span>
+                    </td>
+                    <td>
+                        @if (c.IsExpiringSoon)
+                        {
+                            <span class="ms-badge badge-attention">Expiring Soon (60d)</span>
+                        }
+                        else
+                        {
+                            <span class="ms-badge badge-healthy">Active</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <a asp-controller="Resources" asp-action="Details" asp-route-id="@c.EmployeeId" class="btn btn-sm btn-outline-primary">
+                            Profile
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,206 @@
+@model MicrosoftPracticeManagement.Web.ViewModels.PracticeHealthViewModel
+@{
+    ViewData["Title"] = "Practice Health & Analytics";
+}
+
+<!-- Page Header -->
+<div class="page-header-bar">
+    <div>
+        <h1 class="page-title">Practice Health & Workforce Analytics</h1>
+        <div class="page-desc">Executive insights into delivery utilization, experience demographics, attrition rates, and hiring pipeline</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="Reports" asp-action="ExportHealth" class="btn-fluent-secondary">
+            <i class="bi bi-file-earmark-arrow-down"></i>Export Report
+        </a>
+    </div>
+</div>
+
+<!-- Top Charts: 12-Month Utilization & Monthly Billability -->
+<div class="row g-4 mb-4">
+    <!-- 1. 12-Month Utilization Trend -->
+    <div class="col-lg-6">
+        <div class="fluent-card mb-0">
+            <div class="fluent-card-header">
+                <h3 class="fluent-card-title"><i class="bi bi-graph-up text-primary"></i>12-Month Utilization vs 85% Target</h3>
+                <span class="badge bg-success-subtle text-success border">Current: 88.2%</span>
+            </div>
+            <div style="height: 280px; position: relative;">
+                <canvas id="healthUtilChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Billability Trend -->
+    <div class="col-lg-6">
+        <div class="fluent-card mb-0">
+            <div class="fluent-card-header">
+                <h3 class="fluent-card-title"><i class="bi bi-cash-stack text-success"></i>Monthly Billability Trajectory</h3>
+                <span class="badge bg-primary-subtle text-primary border">Target: > 80%</span>
+            </div>
+            <div style="height: 280px; position: relative;">
+                <canvas id="healthBillChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Middle Charts: Experience Distribution Tiers & Attrition -->
+<div class="row g-4 mb-4">
+    <!-- 3. Experience Distribution Tiers -->
+    <div class="col-lg-6">
+        <div class="fluent-card mb-0">
+            <div class="fluent-card-header">
+                <h3 class="fluent-card-title"><i class="bi bi-bar-chart-steps text-purple"></i>Experience Tier Demographics</h3>
+                <span class="badge bg-light text-secondary border">0-3y to 12y+</span>
+            </div>
+            <div style="height: 280px; position: relative;">
+                <canvas id="healthExpChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Attrition Curve -->
+    <div class="col-lg-6">
+        <div class="fluent-card mb-0">
+            <div class="fluent-card-header">
+                <h3 class="fluent-card-title"><i class="bi bi-arrow-down-right-circle text-warning"></i>Annualized Attrition Rate Trajectory</h3>
+                <span class="badge bg-success-subtle text-success border">Healthy < 10%</span>
+            </div>
+            <div style="height: 280px; position: relative;">
+                <canvas id="healthAttritionChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Future Hiring Demand Table -->
+<div class="fluent-card">
+    <div class="fluent-card-header">
+        <h3 class="fluent-card-title"><i class="bi bi-person-plus-fill text-primary"></i>Strategic Hiring & Talent Acquisition Plan</h3>
+        <span class="badge bg-primary">Future Quarters</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" style="font-size: 13px;">
+            <thead class="table-light">
+                <tr>
+                    <th>Technology Competency</th>
+                    <th>Target Role</th>
+                    <th>Experience Level</th>
+                    <th>Open Requisitions</th>
+                    <th>Target Quarter</th>
+                    <th>Hiring Priority</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var h in Model.Health.HiringRequirements)
+                {
+                    <tr>
+                        <td><strong class="text-dark">@h.Technology</strong></td>
+                        <td><span class="badge bg-light text-dark border">@h.Role</span></td>
+                        <td>@h.ExperienceLevel</td>
+                        <td><span class="badge bg-primary-subtle text-primary border border-primary-subtle fs-6">@h.OpenPositions Headcount</span></td>
+                        <td><span class="badge bg-light text-secondary border">@h.TargetQuarter</span></td>
+                        <td>
+                            <span class="ms-badge @(h.Priority == "Urgent" ? "badge-critical" : h.Priority == "High" ? "badge-attention" : "badge-info")">
+                                @h.Priority
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // 1. Health Util Chart
+            const utilCtx = document.getElementById("healthUtilChart");
+            if (utilCtx) {
+                const data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Health.UtilizationTrend12M));
+                new Chart(utilCtx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: data.datasets.map(ds => ({
+                            label: ds.label,
+                            data: ds.data,
+                            borderColor: ds.borderColors[0],
+                            backgroundColor: ds.backgroundColors && ds.backgroundColors.length ? ds.backgroundColors[0] : 'transparent',
+                            borderWidth: ds.borderWidth,
+                            fill: ds.fill,
+                            tension: parseFloat(ds.tension || '0')
+                        }))
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            // 2. Health Billability Chart
+            const billCtx = document.getElementById("healthBillChart");
+            if (billCtx) {
+                const data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Health.BillabilityTrendMonthly));
+                new Chart(billCtx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'Billability %',
+                            data: data.datasets[0].data,
+                            borderColor: '#107c41',
+                            backgroundColor: 'rgba(16, 124, 65, 0.15)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            // 3. Experience Tier Chart
+            const expCtx = document.getElementById("healthExpChart");
+            if (expCtx) {
+                const data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Health.ExperienceDistribution));
+                new Chart(expCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'Headcount',
+                            data: data.datasets[0].data,
+                            backgroundColor: data.datasets[0].backgroundColors,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            // 4. Attrition Chart
+            const attrCtx = document.getElementById("healthAttritionChart");
+            if (attrCtx) {
+                const data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Health.AttritionTrend));
+                new Chart(attrCtx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'Annualized Attrition %',
+                            data: data.datasets[0].data,
+                            borderColor: '#d83b01',
+                            backgroundColor: 'rgba(216, 59, 1, 0.12)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+        });
+    </script>
+}

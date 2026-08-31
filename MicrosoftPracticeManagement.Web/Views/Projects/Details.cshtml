@@ -1,0 +1,155 @@
+@model MicrosoftPracticeManagement.Web.ViewModels.ProjectDetailsViewModel
+@{
+    ViewData["Title"] = $"{Model.Project.ProjectName} - Project Details";
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb" style="font-size: 13px;">
+        <li class="breadcrumb-item"><a asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Projects</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Model.Project.ProjectName</li>
+    </ol>
+</nav>
+
+<!-- Project Header Banner -->
+<div class="fluent-card mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-primary">@Model.Project.Account</span>
+                <span class="text-muted">@Model.Project.ProjectId</span>
+                <span class="ms-badge @(Model.Project.Health == "Green" ? "badge-healthy" : Model.Project.Health == "Amber" ? "badge-attention" : "badge-critical")">
+                    @Model.Project.Health Health
+                </span>
+                <span class="badge bg-light text-dark border">@Model.Project.Status</span>
+            </div>
+            <h1 class="page-title fs-4">@Model.Project.ProjectName</h1>
+            <div class="text-muted mt-1" style="font-size: 13px;">
+                <span>Project Manager: <strong>@Model.Project.PM</strong></span> • 
+                <span>Timeline: <strong>@Model.Project.StartDate.ToString("MMM dd, yyyy") - @Model.Project.EndDate.ToString("MMM dd, yyyy")</strong></span> • 
+                <span>Budget: <strong>$@Model.Project.Budget.ToString("N0")</strong></span>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-account="@Model.Project.Account" asp-route-id="@Model.Project.ProjectId" class="btn-fluent-secondary">
+                <i class="bi bi-pencil"></i>Edit Project
+            </a>
+            <a asp-action="Timeline" class="btn-fluent-primary">
+                <i class="bi bi-bar-chart-steps"></i>View in Timeline
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Team Allocations -->
+    <div class="col-lg-8">
+        <div class="fluent-card mb-4">
+            <div class="fluent-card-header">
+                <h2 class="fluent-card-title"><i class="bi bi-people-fill text-primary"></i>Assigned Delivery Team</h2>
+                <span class="badge bg-light text-secondary border">@Model.Project.Allocations.Count Consultants</span>
+            </div>
+
+            @if (!Model.Project.Allocations.Any())
+            {
+                <div class="p-4 text-center text-muted">
+                    No consultants currently assigned to this project.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" style="font-size: 13px;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Consultant</th>
+                                <th>Role</th>
+                                <th>Allocation %</th>
+                                <th>Schedule</th>
+                                <th>Billable</th>
+                                <th class="text-end">Profile</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var a in Model.Project.Allocations)
+                            {
+                                <tr>
+                                    <td>
+                                        <a asp-controller="Resources" asp-action="Details" asp-route-id="@a.EmployeeId" class="fw-semibold text-primary text-decoration-none">
+                                            @a.EmployeeName
+                                        </a>
+                                        <div class="text-muted" style="font-size: 11px;">@a.EmployeeId</div>
+                                    </td>
+                                    <td><span class="badge bg-light text-dark border">@a.Role</span></td>
+                                    <td><span class="fw-bold text-success">@a.AllocationPercent%</span></td>
+                                    <td><small class="text-muted">@a.StartDate.ToString("MMM dd") - @a.EndDate.ToString("MMM dd")</small></td>
+                                    <td>
+                                        <span class="badge bg-success-subtle text-success">Billable</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-controller="Resources" asp-action="Details" asp-route-id="@a.EmployeeId" class="btn btn-sm btn-outline-secondary py-0">
+                                            View
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Right Column: Project Details & Tech Stack -->
+    <div class="col-lg-4">
+        <!-- Overview Card -->
+        <div class="fluent-card mb-4">
+            <div class="fluent-card-header">
+                <h3 class="fluent-card-title"><i class="bi bi-info-circle text-primary"></i>Engagement Summary</h3>
+            </div>
+            <p class="text-muted mb-3" style="font-size: 13px; line-height: 1.5;">
+                @Model.Project.Description
+            </p>
+            <ul class="list-group list-group-flush" style="font-size: 13px;">
+                <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                    <span class="text-muted">Required Headcount</span>
+                    <span class="fw-bold">@Model.Project.RequiredResources</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                    <span class="text-muted">Currently Allocated</span>
+                    <span class="fw-bold">@Model.Project.TotalAllocated</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                    <span class="text-muted">Staffing Gap</span>
+                    @if (Model.Project.StaffingGap > 0)
+                    {
+                        <span class="badge bg-danger">@Model.Project.StaffingGap Positions Open</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success-subtle text-success">Zero Gap</span>
+                    }
+                </li>
+                <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                    <span class="text-muted">Delivery Practice</span>
+                    <span>@Model.Project.PracticeArea</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Tech Stack Card -->
+        <div class="fluent-card">
+            <div class="fluent-card-header">
+                <h3 class="fluent-card-title"><i class="bi bi-stack text-primary"></i>Technology Stack</h3>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var t in Model.Project.TechnologyStack.Split(','))
+                {
+                    <span class="badge bg-light text-dark border p-2">@t.Trim()</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>

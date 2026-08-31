@@ -1,0 +1,103 @@
+@model MicrosoftPracticeManagement.Services.DTOs.ResourceDto
+@{
+    ViewData["Title"] = "Add New Consultant";
+}
+
+<div class="page-header-bar">
+    <div>
+        <h1 class="page-title">Add New Consultant</h1>
+        <div class="page-desc">Onboard a new consultant to the Microsoft Practice Hub roster</div>
+    </div>
+    <a asp-action="Index" class="btn-fluent-secondary">
+        <i class="bi bi-arrow-left"></i>Back to Directory
+    </a>
+</div>
+
+<div class="fluent-card" style="max-width: 800px;">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Name" class="form-label fw-semibold">Full Name *</label>
+                <input asp-for="Name" class="form-control" required placeholder="e.g. Suman Bhavansi" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Email" class="form-label fw-semibold">Email Address *</label>
+                <input asp-for="Email" type="email" class="form-control" required placeholder="e.g. suman.b@microsoftpractice.com" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Designation" class="form-label fw-semibold">Designation *</label>
+                <input asp-for="Designation" class="form-control" required placeholder="e.g. Senior Cloud Solution Architect" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="PrimarySkill" class="form-label fw-semibold">Primary Skill *</label>
+                <select asp-for="PrimarySkill" class="form-select" required>
+                    <option value=".NET 8 / C#">.NET 8 / C#</option>
+                    <option value="Azure Cloud Architecture">Azure Cloud Architecture</option>
+                    <option value="Azure OpenAI & Cognitive Services">Azure OpenAI & Cognitive Services</option>
+                    <option value="Azure DevOps & Terraform">Azure DevOps & Terraform</option>
+                    <option value="Power Platform & Power Apps">Power Platform & Power Apps</option>
+                    <option value="Azure Databricks & Fabric">Azure Databricks & Fabric</option>
+                    <option value="React & TypeScript">React & TypeScript</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="SecondarySkill" class="form-label fw-semibold">Secondary Skill</label>
+                <input asp-for="SecondarySkill" class="form-control" placeholder="e.g. Docker, Redis, Power BI" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="ExperienceYears" class="form-label fw-semibold">Years of Experience</label>
+                <input asp-for="ExperienceYears" type="number" step="0.5" class="form-control" value="5.0" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Location" class="form-label fw-semibold">Base Location</label>
+                <select asp-for="Location" class="form-select">
+                    <option value="Hyderabad">Hyderabad</option>
+                    <option value="Bangalore">Bangalore</option>
+                    <option value="Pune">Pune</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Seattle">Seattle</option>
+                    <option value="Dallas">Dallas</option>
+                    <option value="London">London</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="ManagerName" class="form-label fw-semibold">Reporting Manager</label>
+                <select asp-for="ManagerName" class="form-select">
+                    <option value="Ravi Gunda">Ravi Gunda (Practice Director)</option>
+                    <option value="Priya Sharma">Priya Sharma (Principal Architect)</option>
+                    <option value="Rajesh Kumar">Rajesh Kumar (Senior Delivery Lead)</option>
+                    <option value="Ananya Roy">Ananya Roy (Director - AI)</option>
+                    <option value="Michael Vance">Michael Vance (Global Solutions Principal)</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="AllocationPercent" class="form-label fw-semibold">Allocation %</label>
+                <input asp-for="AllocationPercent" type="number" class="form-control" value="0" />
+            </div>
+
+            <div class="col-md-6 d-flex align-items-center mt-4">
+                <div class="form-check form-switch">
+                    <input asp-for="Billable" class="form-check-input" type="checkbox" checked />
+                    <label asp-for="Billable" class="form-check-label fw-semibold">Billable Resource</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn-fluent-primary">
+                <i class="bi bi-check-lg"></i>Save Consultant
+            </button>
+        </div>
+    </form>
+</div>

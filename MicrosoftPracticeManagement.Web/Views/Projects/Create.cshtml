@@ -1,0 +1,88 @@
+@model MicrosoftPracticeManagement.Services.DTOs.ProjectDto
+@{
+    ViewData["Title"] = "Create New Project";
+}
+
+<div class="page-header-bar">
+    <div>
+        <h1 class="page-title">Create New Project</h1>
+        <div class="page-desc">Add a new engagement to the Microsoft Practice portfolio</div>
+    </div>
+    <a asp-action="Index" class="btn-fluent-secondary">
+        <i class="bi bi-arrow-left"></i>Back to Projects
+    </a>
+</div>
+
+<div class="fluent-card" style="max-width: 800px;">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Account" class="form-label fw-semibold">Client Account *</label>
+                <input asp-for="Account" class="form-control" required placeholder="e.g. Microsoft Corp, Contoso" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="ProjectName" class="form-label fw-semibold">Project Name *</label>
+                <input asp-for="ProjectName" class="form-control" required placeholder="e.g. Azure GenAI Migration" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="PM" class="form-label fw-semibold">Project Manager *</label>
+                <input asp-for="PM" class="form-control" required placeholder="e.g. Priya Sharma" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="TechnologyStack" class="form-label fw-semibold">Technology Stack *</label>
+                <input asp-for="TechnologyStack" class="form-control" required placeholder="e.g. .NET 8, Azure OpenAI, AKS" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="StartDate" class="form-label fw-semibold">Start Date</label>
+                <input asp-for="StartDate" type="date" class="form-control" value="@DateTime.UtcNow.ToString("yyyy-MM-dd")" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="EndDate" class="form-label fw-semibold">End Date</label>
+                <input asp-for="EndDate" type="date" class="form-control" value="@DateTime.UtcNow.AddMonths(6).ToString("yyyy-MM-dd")" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="RequiredResources" class="form-label fw-semibold">Required Headcount</label>
+                <input asp-for="RequiredResources" type="number" class="form-control" value="8" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="TotalAllocated" class="form-label fw-semibold">Currently Allocated</label>
+                <input asp-for="TotalAllocated" type="number" class="form-control" value="6" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Budget" class="form-label fw-semibold">Budget (USD)</label>
+                <input asp-for="Budget" type="number" class="form-control" value="450000" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Health" class="form-label fw-semibold">Delivery Health</label>
+                <select asp-for="Health" class="form-select">
+                    <option value="Green">Green (On Track)</option>
+                    <option value="Amber">Amber (Needs Attention)</option>
+                    <option value="Red">Red (Critical Gap)</option>
+                </select>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Description" class="form-label fw-semibold">Project Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Strategic enterprise objectives..."></textarea>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            <button type="submit" class="btn-fluent-primary">
+                <i class="bi bi-check-lg"></i>Save Project
+            </button>
+        </div>
+    </form>
+</div>

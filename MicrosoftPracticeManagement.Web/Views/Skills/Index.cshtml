@@ -1,0 +1,183 @@
+@model MicrosoftPracticeManagement.Web.ViewModels.SkillsMatrixViewModel
+@{
+    ViewData["Title"] = "Skills Matrix & Capabilities";
+}
+
+<!-- Page Header -->
+<div class="page-header-bar">
+    <div>
+        <h1 class="page-title">Skills Matrix & Practice Readiness</h1>
+        <div class="page-desc">Comprehensive competency heatmaps across Microsoft cloud, AI, data, and DevOps capabilities</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Certifications" class="btn-fluent-secondary">
+            <i class="bi bi-patch-check"></i>Certification Tracker
+        </a>
+        <a asp-action="MissingSkills" class="btn-fluent-primary">
+            <i class="bi bi-graph-up-arrow"></i>Skills Gap Analysis
+        </a>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<form method="get" asp-action="Index" class="filter-bar">
+    <div class="d-flex align-items-center gap-2 flex-grow-1">
+        <i class="bi bi-search text-muted"></i>
+        <input type="text" name="tech" value="@Model.TechFilter" placeholder="Filter by technology name (e.g. .NET 8, OpenAI, Kubernetes)..." class="form-control form-control-sm" />
+    </div>
+
+    <div>
+        <select name="level" class="form-select form-select-sm filter-input">
+            <option value="">All Competency Levels</option>
+            <option value="Beginner" selected="@(Model.LevelFilter == "Beginner" ? "selected" : null)">Beginner</option>
+            <option value="Intermediate" selected="@(Model.LevelFilter == "Intermediate" ? "selected" : null)">Intermediate</option>
+            <option value="Advanced" selected="@(Model.LevelFilter == "Advanced" ? "selected" : null)">Advanced</option>
+            <option value="Expert" selected="@(Model.LevelFilter == "Expert" ? "selected" : null)">Expert</option>
+        </select>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn-fluent-primary py-1 px-3">
+            <i class="bi bi-funnel"></i>Filter Matrix
+        </button>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary py-1 px-3">Reset</a>
+    </div>
+</form>
+
+<!-- Skills Matrix Heatmap Table -->
+<div class="fluent-table-wrapper mb-4">
+    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+        <span class="fw-semibold text-dark" style="font-size: 13px;">
+            Core Technology Competency Matrix (@Model.Matrix.SkillCounts.Count Technologies)
+        </span>
+        <div class="d-flex gap-2">
+            <span class="badge skill-heat-expert p-2">Expert (Level 4)</span>
+            <span class="badge skill-heat-advanced p-2">Advanced (Level 3)</span>
+            <span class="badge skill-heat-intermediate p-2">Intermediate (Level 2)</span>
+            <span class="badge skill-heat-beginner p-2">Beginner (Level 1)</span>
+        </div>
+    </div>
+
+    <table class="fluent-table">
+        <thead>
+            <tr>
+                <th>Technology / Practice Stream</th>
+                <th>Category</th>
+                <th class="text-center" style="width: 110px;">Beginner</th>
+                <th class="text-center" style="width: 110px;">Intermediate</th>
+                <th class="text-center" style="width: 110px;">Advanced</th>
+                <th class="text-center" style="width: 110px;">Expert</th>
+                <th class="text-center" style="width: 130px;">Certified Engineers</th>
+                <th class="text-end">Directory</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var s in Model.Matrix.SkillCounts)
+            {
+                <tr>
+                    <td>
+                        <strong class="text-dark">@s.Technology</strong>
+                    </td>
+                    <td><span class="badge bg-light text-secondary border">@s.Category</span></td>
+                    <td class="text-center skill-heat-beginner">@s.BeginnerCount</td>
+                    <td class="text-center skill-heat-intermediate">@s.IntermediateCount</td>
+                    <td class="text-center skill-heat-advanced">@s.AdvancedCount</td>
+                    <td class="text-center skill-heat-expert">@s.ExpertCount</td>
+                    <td class="text-center">
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                            <i class="bi bi-patch-check-fill me-1"></i>@s.TotalCertified Certified
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <a asp-controller="Resources" asp-action="Index" asp-route-technology="@s.Technology" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;">
+                            View Talent →
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Bottom Row: Expiring Certifications & Gaps -->
+<div class="row g-4">
+    <!-- Expiring Certifications -->
+    <div class="col-lg-6">
+        <div class="fluent-card mb-0">
+            <div class="fluent-card-header">
+                <h3 class="fluent-card-title"><i class="bi bi-clock-history text-warning"></i>Certifications Expiring in Next 60 Days</h3>
+                <span class="badge bg-warning text-dark">@Model.Matrix.ExpiringCertifications.Count Expiring</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size: 12px;">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Consultant</th>
+                            <th>Certification</th>
+                            <th>Expiry Date</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model.Matrix.ExpiringCertifications.Take(5))
+                        {
+                            <tr>
+                                <td>
+                                    <a asp-controller="Resources" asp-action="Details" asp-route-id="@c.EmployeeId" class="fw-semibold text-primary text-decoration-none">
+                                        @c.EmployeeName
+                                    </a>
+                                </td>
+                                <td><span class="badge bg-light text-dark border">@c.Certification.Split(':')[0]</span></td>
+                                <td><span class="badge bg-warning-subtle text-warning">@(c.ExpiryDate?.ToString("MMM dd, yyyy"))</span></td>
+                                <td class="text-end">
+                                    <a asp-controller="Resources" asp-action="Details" asp-route-id="@c.EmployeeId" class="btn btn-sm btn-outline-secondary py-0">View</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Missing Skills Gaps -->
+    <div class="col-lg-6">
+        <div class="fluent-card mb-0">
+            <div class="fluent-card-header">
+                <h3 class="fluent-card-title"><i class="bi bi-lightning-charge-fill text-danger"></i>High Priority Capability Gaps</h3>
+                <span class="badge bg-danger">Capacity Deficits</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size: 12px;">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Competency Area</th>
+                            <th>Current Capacity</th>
+                            <th>Project Demand</th>
+                            <th>Gap Deficit</th>
+                            <th>Priority</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var g in Model.Matrix.MissingSkillsGaps)
+                        {
+                            <tr>
+                                <td class="fw-semibold text-dark">@g.Technology</td>
+                                <td>@g.CurrentCapacity Lead/Architects</td>
+                                <td>@g.ProjectDemand Required</td>
+                                <td>
+                                    <span class="badge bg-danger">@g.GapCount Positions</span>
+                                </td>
+                                <td>
+                                    <span class="ms-badge @(g.Priority == "High" ? "badge-critical" : "badge-attention")">
+                                        @g.Priority
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
